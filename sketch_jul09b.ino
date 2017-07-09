@@ -5,6 +5,16 @@ const int number_of_anode_pins = sizeof(anode_pins) / sizeof(anode_pins[0]);
 const int number_of_cathode_pins = sizeof(cathode_pins) / sizeof(cathode_pins[0]);
 int numbers_to_display = 0; // LEDに表示する数字を保持する変数
 
+void display_0() {
+  digitalWrite(12, LOW);
+  digitalWrite(8, LOW);
+  digitalWrite(5, LOW);
+  digitalWrite(3, LOW);
+  digitalWrite(2, LOW);
+  digitalWrite(11, LOW);
+  digitalWrite(6, LOW);
+  digitalWrite(4, HIGH);
+}
 const int digits[] = {
   0b00111111, // 0
   0b00000110, // 1
@@ -24,14 +34,16 @@ const int dot = 0b00000000;
 void display_number (int n) {
   for (int i = 0; i < number_of_anode_pins; i++) {
     digitalWrite(anode_pins[i], digits[n] & (1 << i) ? HIGH : LOW);
+    digitalWrite(4, LOW);
   }
 }
-// 1桁の数字(n)を表示する
+// 1桁の数字(n)と小数点を表示する
 void display_number_with_dot (int n) {
   for (int i = 0; i < number_of_anode_pins; i++) {
     digitalWrite(anode_pins[i], digits[n] & (1 << i) ? HIGH : LOW);
+    digitalWrite(4, HIGH);
   }
-//  digitalWrite(dot_pin, HIGH);
+  Serial.println(n);
 }
 
 // アノードをすべてLOWにする
@@ -65,9 +77,7 @@ void set_number(double origin_n) {
   // int n = numbers_to_display;  // number_to_displayの値を書き換えないために変数にコピー
   int dot_position = find_dot_dot_position(origin_n);
   int n = to_int( origin_n, dot_position );
-  Serial.print(n);
   for (int i = 0; i < number_of_cathode_pins; i++) {
-    Serial.println("loop i: ");
     digitalWrite(cathode_pins[i], LOW);
     if(i == dot_position) {
       display_number_with_dot(n % 10);
@@ -103,7 +113,6 @@ void set_numbers(int n) {
 // setup()　は、最初に一度だけ実行される
 void setup() {
   Serial.begin(9800);
-  set_number(12.34);
   for (int i = 0; i < number_of_anode_pins; i++) {
     pinMode(anode_pins[i], OUTPUT);  // anode_pinsを出力モードに設定する
   }
@@ -111,6 +120,7 @@ void setup() {
     pinMode(cathode_pins[i], OUTPUT);  // cathode_pinを出力モードに設定する
     digitalWrite(cathode_pins[i], HIGH);
   }
+  pinMode(dot_pin, OUTPUT);  // cathode_pinを出力モードに設定する
 
   // f = クロック周波数 / ( 2 * 分周比　*　( 1 + 比較レジスタの値))
   // 分周比=32, 比較レジスタの1値=255 -> f = 16000000 / (2 * 32 * 256) = 976 Hz
@@ -122,9 +132,7 @@ void setup() {
 void loop () {
 
    for (int i = 0; i < 10000; i++) {
-  //   set_numbers(i);
     set_number(12.34);
-     delay(1000);
    }
 }
 
