@@ -113,7 +113,7 @@ void setup() {
 void loop () {
 
    for (int i = 0; i < 10000; i++) {
-    set_number(543.2);
+    set_number(12.3);
     delay(1000);
    }
 }
