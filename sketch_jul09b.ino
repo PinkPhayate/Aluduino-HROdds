@@ -17,24 +17,28 @@ const int digits[] = {
   0b00100111, // 7
   0b01111111, // 8
   0b01101111, // 9
+  0b00000000,
 };
 
 // 1桁の数字(n)を表示する
 void display_number (int n) {
   for (int i = 0; i < number_of_anode_pins; i++) {
     digitalWrite(anode_pins[i], digits[n] & (1 << i) ? HIGH : LOW);
-    digitalWrite(4, LOW);
+     
   }
-  Serial.println(n);
+  digitalWrite(4, LOW);
+  //Serial.println(n);
 }
 // 1桁の数字(n)と小数点を表示する
 void display_number_with_dot (int n) {
   for (int i = 0; i < number_of_anode_pins; i++) {
     digitalWrite(anode_pins[i], digits[n] & (1 << i) ? HIGH : LOW);
-    
   }
-  digitalWrite(4, HIGH);
-  Serial.println(n);
+  digitalWrite(4, LOW);
+
+
+  
+  //Serial.println(n);
 }
 
 // アノードをすべてLOWにする
@@ -43,18 +47,11 @@ void clear_segments() {
     digitalWrite(anode_pins[j], LOW);
   }
 }
+/*
 int find_dot_dot_position(double n) {
-  if(n > 1000) {
-    return 0;
-  }
-  if(n > 100) {
     return 1;
-  }
-  if(n > 10) {
-    return 2;
-  }
-    return 3;
 }
+*/
 int to_int(double n, int dot_position) {
   int i = 0;
   int num = 1;
@@ -64,23 +61,28 @@ int to_int(double n, int dot_position) {
   }
   return num * n;
 }
+
 void print_number() {
-  // int n = numbers_to_display;  // number_to_displayの値を書き換えないために変数にコピー
+   //int n = numbers_to_display;  // number_to_displayの値を書き換えないために変数にコピー
   double origin_n = number_to_display;
-  int dot_position = find_dot_dot_position(origin_n);
-  int n = to_int( origin_n, dot_position );
+  //int dot_position = find_dot_dot_position(origin_n);
+  int n = to_int( origin_n, 1 );
+  
   for (int i = 0; i < number_of_cathode_pins; i++) {
     digitalWrite(cathode_pins[i], LOW);
-    if(i == dot_position) {
+    if(i == 1) {
+      digitalWrite(4, HIGH);
       display_number_with_dot(n % 10);
+      //Serial.println(n);
     }
     else {
       display_number(n % 10); // 最後の一桁を表示する
     }
-    delayMicroseconds(100);
+    //delayMicroseconds(100);
     clear_segments();
     digitalWrite(cathode_pins[i], HIGH);
     n = n / 10; // 10で割る
+    if(n==0)break;
   }
 
 
@@ -111,9 +113,10 @@ void setup() {
 }
 
 void loop () {
-
-   for (int i = 0; i < 10000; i++) {
-    set_number(12.3);
+  for (int i = 0; i < 10000; i++) {
+    
+    set_number(i);
+    //Serial.println(i);
     delay(1000);
    }
 }
