@@ -113,11 +113,13 @@ void setup() {
 }
 
 void loop () {
-    int inputchar;      //入力状態の読み取りに使う
+    double inputchar;      //入力状態の読み取りに使う
 
-  inputchar = Serial.read();  //シリアル通信で送信された値を読み取る
+//  inputchar = Serial.read();  //シリアル通信で送信された値を読み取る
+  inputchar = Serial.parseFloat();  //シリアル通信で送信された値を読み取る
+  Serial.println(inputchar);
 
-  if(inputchar!=-1){
+  if(inputchar!=0.00){
     set_number(inputchar);
   }else {
   }
