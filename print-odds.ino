@@ -113,12 +113,21 @@ void setup() {
 }
 
 void loop () {
-  for (int i = 0; i < 10000; i++) {
-    
-    set_number(i);
-    //Serial.println(i);
-    delay(1000);
-   }
+    int inputchar;      //入力状態の読み取りに使う
+
+  inputchar = Serial.read();  //シリアル通信で送信された値を読み取る
+
+  if(inputchar!=-1){
+    set_number(inputchar);
+  }else {
+  }
+  
+//  for (int i = 0; i < 10000; i++) {
+//    
+//    set_number(i);
+//    //Serial.println(i);
+//    delay(1000);
+//   }
 }
 
 ISR(TIMER2_COMPA_vect) {
