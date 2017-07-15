@@ -64,6 +64,9 @@ int to_int(double n, int dot_position) {
 
 void print_number() {
    //int n = numbers_to_display;  // number_to_displayの値を書き換えないために変数にコピー
+   if(number_to_display<0) {
+    return;
+   }
   double origin_n = number_to_display;
   //int dot_position = find_dot_dot_position(origin_n);
   int n = to_int( origin_n, 1 );
@@ -117,10 +120,15 @@ void loop () {
 
 //  inputchar = Serial.read();  //シリアル通信で送信された値を読み取る
   inputchar = Serial.parseFloat();  //シリアル通信で送信された値を読み取る
-  Serial.println(inputchar);
+//  Serial.println(inputchar);
+  if(inputchar==-1){
+    clear_segments();
+  }
 
   if(inputchar!=0.00){
+    Serial.println(inputchar);
     set_number(inputchar);
+    delay(1000);
   }else {
   }
   
