@@ -34,11 +34,10 @@ def main():
             c = ser.readline()
             try:
                 c = ser.readline()
-            # TODO: ser.readline()のエラーを特定し、そこだけキャッチする
             except(serial.serialutil.SerialException):
                 print('unexpected return value')
                 c = ''
-            if 1<len(c):
+            if 0<len(c):
                 num = analyze(c.decode())
                 if(num != 'CANT'):
                     nums.append(num)
