@@ -31,12 +31,12 @@ def main():
         counter = 0
         nums = []
         while True:
-            c = ser.readline()
             try:
                 c = ser.readline()
             except(serial.serialutil.SerialException):
                 print('unexpected return value')
                 c = ''
+            print(c)
             if 0<len(c):
                 num = analyze(c.decode())
                 if(num != 'CANT'):
