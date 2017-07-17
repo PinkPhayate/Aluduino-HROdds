@@ -9,7 +9,7 @@ odds_list = ow.get_race_odds(race_id)
 print(odds_list)
 
 def main():
-    with serial.Serial('/dev/cu.usbmodem14611',9800,timeout=1) as ser:
+    with serial.Serial('/dev/cu.usbmodem14111',9800,timeout=1) as ser:
         no = 1;
         for odds in odds_list:
             # ser.write(b"015.1")
