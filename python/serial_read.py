@@ -26,8 +26,8 @@ def analyze(input):
 def send_number(num):
     print(num)
 
-def main():
-    with serial.Serial('/dev/cu.usbmodem14111',115200,timeout=1) as ser:
+def main(name, port):
+    with serial.Serial(serial,port,timeout=1) as ser:
         counter = 0
         nums = []
         while True:
@@ -46,5 +46,5 @@ def main():
             counter += 1
         ser.close()
 
-if __name__=="__main__":
-    main()
+if __name__ == "__main__":
+    main('/dev/cu.usbmodem14111', 115200)
