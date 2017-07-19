@@ -18,6 +18,7 @@ const int digits[] = {
   0b01111111, // 8
   0b01101111, // 9
   0b00000000,
+  0b01111001, // E
 };
 
 // 1桁の数字(n)を表示する
@@ -40,6 +41,15 @@ void display_number_with_dot (int n) {
   
   //Serial.println(n);
 }
+
+void display_error () {
+  digitalWrite(cathode_pins[0], LOW);
+  for (int i = 0; i < number_of_anode_pins; i++) {
+    digitalWrite(anode_pins[i], digits[11] & (1 << i) ? HIGH : LOW);
+  }
+  digitalWrite(4, LOW);
+}
+
 
 // アノードをすべてLOWにする
 void clear_segments() {
@@ -64,7 +74,11 @@ int to_int(double n, int dot_position) {
 
 void print_number() {
    //int n = numbers_to_display;  // number_to_displayの値を書き換えないために変数にコピー
-   if(number_to_display<0) {
+   if(number_to_display==999) {
+    display_error();
+    return;
+   }
+   else if(number_to_display<0) {
     return;
    }
   double origin_n = number_to_display;
@@ -120,6 +134,7 @@ void loop () {
 
 //  inputchar = Serial.read();  //シリアル通信で送信された値を読み取る
   inputchar = Serial.parseFloat();  //シリアル通信で送信された値を読み取る
+//  inputchar = 999;
 //  Serial.println(inputchar);
   if(inputchar==-1){
     clear_segments();
@@ -127,7 +142,8 @@ void loop () {
 
   if(inputchar!=0.00){
     Serial.println(inputchar);
-    set_number(inputchar);
+    if(inputchar==999.00)number_to_display=999;
+    else set_number(inputchar);
     delay(1000);
   }else {
   }
@@ -142,6 +158,6 @@ void loop () {
 
 ISR(TIMER2_COMPA_vect) {
 //  display_numbers();
-  print_number();
+print_number();
 }
 
