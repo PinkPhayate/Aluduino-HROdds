@@ -1,49 +1,46 @@
-
+import csv
+import sys
 import serial   #モジュール名はpyserialだが, importする際はserialである
 from oddsman import oddsman
 import time
-
+import serial_con as sc
 ow = oddsman.OddsWatcher()
-race_id = '201702010412'
-odds_list = ow.get_race_odds(race_id)
-print(odds_list)
 
-def main():
-    with serial.Serial('/dev/cu.usbmodem14111',9800,timeout=1) as ser:
-        no = 1;
+
+MACHINE_NAME = "/dev/cu.usbmodem14111"
+PORT         = "9800"
+def save_cash(race_id, odds_list):
+    print('save_cash')
+    ### cache server に保存
+
+def test_get_race_odds(mode=None):
+    if mode == 'test':   # test mode
+        race_id = '201209030811'
+        odds_list = ow.get_race_odds(race_id)
+    else:
+        odds_list = ow.get_nearest_odds()
+    save_cash(race_id=race_id, odds_list=odds_list)
+    print(odds_list)
+
+def export(odds_list):
+    with serial.Serial( MACHINE_NAME, PORT, timeout=1) as ser:
+        no = 1
+        odds_list = get_odds_list()
         for odds in odds_list:
-            # ser.write(b"015.1")
             ser.write(str(no).encode('utf-8'))
+            print(no)
             time.sleep(2)
             ser.write(str(odds).encode('utf-8'))
+            print(odds)
             no += 1
             time.sleep(2)
 
         ser.write(str(-1).encode('utf-8'))
         ser.close()
-        # while True:
-        #     # inp = int(input())
-        #     # inp = int(input())
-        #
-        #     # flag=bytes("1.11",'utf-8')
-        #
-        #     #シリアル通信で文字を送信する際は, byte文字列に変換する
-        #     #input()する際の文字列はutf-8
-        #     # inp = 55
-        #     # ser.write(inp.to_bytes(2, 'little'))
-        #     # ser.write(bytes([inp]))
-        #     ser.write(b"015.1")
-        #     ser.write(b"016.1")
-        #     ser.write(b"034.1")
-        #     ser.write(b"0.00")
-        #
-            # ser.write(bytes(12.3))
 
-            #シリアル通信:送信
-
-            # if(flag==bytes('a','utf-8')):
-            #     break;
-        # ser.close()
+def main():
+    export()
 
 if __name__ == "__main__":
-    main()
+    args = sys.argv
+    test_get_race_odds(args[1])
