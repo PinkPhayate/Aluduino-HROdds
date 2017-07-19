@@ -98,7 +98,7 @@ void set_number(double n) {
 
 // setup()　は、最初に一度だけ実行される
 void setup() {
-  Serial.begin(9800);
+  Serial.begin(115200);
   for (int i = 0; i < number_of_anode_pins; i++) {
     pinMode(anode_pins[i], OUTPUT);  // anode_pinsを出力モードに設定する
   }
