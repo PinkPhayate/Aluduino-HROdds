@@ -54,15 +54,14 @@ def export(odds_list):
         # ser.write("999".encode('utf-8'))
         ser.close()
 
-def change_mode():
-    # with serial.Serial( MACHINE_NAME, PORT, timeout=1) as ser:
-    #     ser.write("10000".encode('utf-8'))
-    serial_read()
 
 def analyze(input):
     w = input.strip()
+    if w == '67':
+        return
+
     if w in trans_dict.keys():
-        num = trans_dict[input.strip()]
+        num = trans_dict[w]
 
     else:
         print("couldn't transcript: " +  w)
@@ -70,7 +69,7 @@ def analyze(input):
     print(num)
     return num
 
-def send_number(num):
+def end_input(num):
     print(num)
 
 def serial_read():
@@ -84,11 +83,17 @@ def serial_read():
             except(serial.serialutil.SerialException):
                 print('unexpected return value')
                 c = ''
-            print(c)
             if 0<len(c):
+                # print(c)
                 num = analyze(c.decode())
-                if(num != 'CANT'):
+                if(num != 'CANT' and num is not None):
                     nums.append(num)
+                elif num is None and len(nums)!=0:
+                    end_input(nums)
+                    nums = []
+                elif num is None:
+                    print('mode_change')
+
             if 2<counter:
                 counter = -1
             counter += 1
@@ -101,4 +106,4 @@ if __name__ == "__main__":
     args = sys.argv
     odds_list = test_get_race_odds(args[1])
     export(odds_list)
-    change_mode()
+    serial_read()
