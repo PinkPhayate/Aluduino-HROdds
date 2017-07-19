@@ -4,11 +4,25 @@ import serial   #モジュール名はpyserialだが, importする際はserial�
 from oddsman import oddsman
 import time
 import serial_con as sc
+import re
 ow = oddsman.OddsWatcher()
+
+
+trans_dict = {'22':'0',
+            '12':'1',
+            '24':'2',
+            '94':'3',
+            '8':'4',
+            '28':'5',
+            '90':'6',
+            '66':'7',
+            '82':'8',
+            '74':'9'}
 
 
 MACHINE_NAME = "/dev/cu.usbmodem14111"
 PORT         = "115200"
+
 def save_cash(race_id, odds_list):
     print('save_cash')
     ### cache server に保存
@@ -35,8 +49,49 @@ def export(odds_list):
             print(odds)
             no += 1
             time.sleep(2)
+            break
 
-        ser.write(str(-1).encode('utf-8'))
+        # ser.write("999".encode('utf-8'))
+        ser.close()
+
+def change_mode():
+    # with serial.Serial( MACHINE_NAME, PORT, timeout=1) as ser:
+    #     ser.write("10000".encode('utf-8'))
+    serial_read()
+
+def analyze(input):
+    w = input.strip()
+    if w in trans_dict.keys():
+        num = trans_dict[input.strip()]
+
+    else:
+        print("couldn't transcript: " +  w)
+        num = 'CANT'
+    print(num)
+    return num
+
+def send_number(num):
+    print(num)
+
+def serial_read():
+    with serial.Serial( MACHINE_NAME, PORT, timeout=1) as ser:
+        ser.write("10000".encode('utf-8'))
+        counter = 0
+        nums = []
+        while True:
+            try:
+                c = ser.readline()
+            except(serial.serialutil.SerialException):
+                print('unexpected return value')
+                c = ''
+            print(c)
+            if 0<len(c):
+                num = analyze(c.decode())
+                if(num != 'CANT'):
+                    nums.append(num)
+            if 2<counter:
+                counter = -1
+            counter += 1
         ser.close()
 
 def main():
@@ -46,3 +101,4 @@ if __name__ == "__main__":
     args = sys.argv
     odds_list = test_get_race_odds(args[1])
     export(odds_list)
+    change_mode()
