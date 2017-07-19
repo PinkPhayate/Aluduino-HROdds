@@ -1,3 +1,5 @@
+
+// 電光掲示板用
 const int anode_pins[] = {12, 8, 5, 3, 2, 11, 6};    // アノードに接続するArduinoのピン
 const int cathode_pins[] = {7, 9, 10, 13};  // カソードに接続するArduinoのピン
 const int dot_pin= 4;
@@ -5,6 +7,15 @@ const int number_of_anode_pins = sizeof(anode_pins) / sizeof(anode_pins[0]);
 const int number_of_cathode_pins = sizeof(cathode_pins) / sizeof(cathode_pins[0]);
 int numbers_to_display = 0; // LEDに表示する数字を保持する変数
 double number_to_display = 0.0;
+
+
+//IRリモコン解析用
+#define IR_IN 14
+#define IR_DATA_SIZE 100
+ byte ir_data[IR_DATA_SIZE];
+byte ir_code[32];
+int nums[2] = {0,0};
+
 
 const int digits[] = {
   0b00111111, // 0
@@ -113,6 +124,11 @@ void setup() {
   OCR2A = 255; // 255クロックごとに割り込みをかける
   TCCR2B = 0b100; // 分周比を32に設定する
   bitWrite(TIMSK2, OCIE2A, 1); // TIMER2を許可する
+
+  //センサ用
+  pinMode(14, INPUT);
+  digitalWrite(14, HIGH);
+
 }
 
 void loop () {
@@ -131,13 +147,10 @@ void loop () {
     delay(1000);
   }else {
   }
-  
-//  for (int i = 0; i < 10000; i++) {
-//    
-//    set_number(i);
-//    //Serial.println(i);
-//    delay(1000);
-//   }
+
+    ir_read(IR_IN);
+    ir_print_2();
+
 }
 
 ISR(TIMER2_COMPA_vect) {
@@ -145,3 +158,61 @@ ISR(TIMER2_COMPA_vect) {
   print_number();
 }
 
+//データ受信
+void ir_read(byte ir_pin){
+  for(int i = 0; i < IR_DATA_SIZE; i++){
+    ir_data[i] = 0;
+  }
+  unsigned long now, last, start_at;
+  boolean stat;
+  start_at = micros();
+   
+  //2.5秒以上入力がなかったら終了
+  while(stat = digitalRead(ir_pin)){
+    if(micros() - start_at > 2500000) return;
+  }
+   
+  start_at = last = micros();
+  for(int i = 0; i < IR_DATA_SIZE; i++){
+    //入力が反転するまで待ち（上限25ms）
+    while(1){
+      if(stat != digitalRead(ir_pin)) break;
+      if(micros() - last > 25000) return;
+    }
+    now = micros();
+    ir_data[i] = (now - last)/100;  //byteに格納するあため
+    last = now;
+    stat = !stat;
+  }
+}
+
+
+//解析データ出力
+void ir_print_2(){
+  int j = 0;
+  byte result = 0;
+   
+  //1or0判定
+  for (int i = 3; i < 66; i+=2){
+    if(ir_data[i] > 10){
+      ir_code[j] = 1;
+    }else{
+      ir_code[j] = 0;
+    }
+    j++;
+  }
+   
+  //データを数値化
+  for (int i = 0; i < 8; i++){
+    if(ir_code[i+16] == ir_code[i+24]){  //反転データチェック
+      result = 0;
+      break;
+    }else{
+      bitWrite(result,i,ir_code[i+16]);
+    }
+  }
+   
+  if(0 != result) {
+    Serial.println(result);    
+  }
+}
