@@ -76,6 +76,8 @@ void print_number() {
    //int n = numbers_to_display;  // number_to_displayの値を書き換えないために変数にコピー
    if(number_to_display==999) {
     display_error();
+    clear_segments();
+    digitalWrite(cathode_pins[0], HIGH);
     return;
    }
    else if(number_to_display<0) {
