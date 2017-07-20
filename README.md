@@ -6,7 +6,7 @@
 
 ## 起動準備
 
-### redis
+### redis起動コマンド
 redis-server /usr/local/etc/redis.conf
 
 ## リファレンス

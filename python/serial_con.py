@@ -1,40 +1,37 @@
 import csv
 import sys
 import serial   #モジュール名はpyserialだが, importする際はserialである
-from oddsman import oddsman
 import time
 import serial_con as sc
 import re
-ow = oddsman.OddsWatcher()
+import oddsman_wrapper as wrapper
+import cached as chd
 
-
-trans_dict = {'22':'0',
-            '12':'1',
-            '24':'2',
-            '94':'3',
-            '8':'4',
-            '28':'5',
-            '90':'6',
-            '66':'7',
-            '82':'8',
-            '74':'9'}
+trans_dict   = {'22': '0',
+                '12': '1',
+                '24': '2',
+                '94': '3',
+                '8': '4',
+                '28': '5',
+                '90': '6',
+                '66': '7',
+                '82': '8',
+                '74': '9'}
 
 
 MACHINE_NAME = "/dev/cu.usbmodem14111"
 PORT         = "115200"
+args = sys.argv
 
 def save_cash(race_id, odds_list):
     print('save_cash')
     ### cache server に保存
 
 def test_get_race_odds(mode=None):
-    if mode == 'test':   # test mode
-        race_id = '201209030811'
-        odds_list = ow.get_race_odds(race_id)
-    else:
-        odds_list = ow.get_nearest_odds()
-    save_cash(race_id=race_id, odds_list=odds_list)
-    print(odds_list)
+    odds_list = chd.get_race_odds_list()
+    if odds_list is None:
+        odds_list = wrapper.get_race_odds(mode)
+        chd.set_race_odds_list(odds_list)
     return odds_list
 
 def export(odds_list):
@@ -54,28 +51,44 @@ def export(odds_list):
         # ser.write("999".encode('utf-8'))
         ser.close()
 
+def notify():
+    """
+    acknowledge odds about all race hource
+    """
+    odds_list = get_race_odds(args[1])
+    with serial.Serial( MACHINE_NAME, PORT, timeout=1) as ser:
+        for i, odds in enumerate(odds_list):
+            ser.write(str(i).encode('utf-8'))
+            print(i)
+            time.sleep(2)
+            ser.write(str(odds).encode('utf-8'))
+            print(odds)
+            time.sleep(2)
+        ser.close()
 
 def analyze(input):
+    """
+    method for translate number from alduino to python language
+    """
     w = input.strip()
     if w == '67':
         return
 
-    if w in trans_dict.keys():
-        num = trans_dict[w]
-
-    else:
-        print("couldn't transcript: " +  w)
-        num = 'CANT'
-    print(num)
+    num = trans_dict[w] if w in trans_dict.keys() else '*'
+    print(w)
     return num
 
-def end_input(num):
-    print(num)
+def end_input(ser, num):
+    odds_list = test_get_race_odds(args[0])
+    rtval = wrapper.retrieve_odds(odds_list, num)
+    if rtval is not None:
+        ser.write(str(rtval).encode('utf-8'))
+    else:
+        ser.write(str("10000").encode('utf-8'))
+
 
 def serial_read():
     with serial.Serial( MACHINE_NAME, PORT, timeout=1) as ser:
-        ser.write("10000".encode('utf-8'))
-        counter = 0
         nums = []
         while True:
             try:
@@ -86,24 +99,21 @@ def serial_read():
             if 0<len(c):
                 # print(c)
                 num = analyze(c.decode())
-                if(num != 'CANT' and num is not None):
+                if(num is not None):
                     nums.append(num)
-                elif num is None and len(nums)!=0:
-                    end_input(nums)
+                elif num is None and 0 < len(nums):
+                    end_input(ser, nums)
                     nums = []
                 elif num is None:
-                    print('mode_change')
-
-            if 2<counter:
-                counter = -1
-            counter += 1
+                    print('notification mode')
+                    break
         ser.close()
+    notify()
+    return
 
-def main():
-    export()
+# while(True):
+#     serial_read()
 
-if __name__ == "__main__":
-    args = sys.argv
-    odds_list = test_get_race_odds(args[1])
-    export(odds_list)
-    serial_read()
+
+odds_list = test_get_race_odds(args[1])
+print(odds_list)
