@@ -160,8 +160,8 @@ void loop () {
     ir_mode();
   }
   else {
-    enableToPrint = true;
-    display_mode(inputchar);
+     enableToPrint = true;
+     display_mode(inputchar);
   }
 
 }
@@ -179,7 +179,7 @@ void display_mode(double inputchar) {
 
   if(inputchar!=0.00){
     Serial.println(inputchar);
-    if(inputchar==999.00) number_to_display=ERROR_NUM;
+    if(inputchar==999.00) set_number(ERROR_NUM);
     else set_number(inputchar);
     delay(1000);
   }
@@ -249,7 +249,7 @@ void ir_print_2(){
   }
 
   if(0 != result) {
-    Serial.println(result);
+//     Serial.println(result);
     translate(result);
   }
 }
@@ -299,14 +299,26 @@ void translate(byte input_num) {
   if (is_not_play_button) {
     // キューの構造体
     input_nums[1] = input_nums[0];
-    input_nums[0] = (double)translated_num;
+    input_nums[0] = translated_num;
+    enableToPrint = true;
+    set_number(calc_input_nums());
   }
   if(!is_not_play_button) {
     enableToPrint = true;
-    double num = input_nums[1]*10 + input_nums[0];
+    double num = calc_input_nums();
     input_nums[1] = 0.0;
     input_nums[0] = 0.0;
+//    Serial.println(num);
     set_number(num);
+    get_odds(num);
     /** ここでコンソールに出力して、値をもらう*/
+
   }
+}
+double calc_input_nums() {
+  return input_nums[1]*10 + input_nums[0];
+}
+void get_odds(double num) {
+  if(0 < num) Serial.println(num);
+  else Serial.println(PLAT_BUTTON);
 }
