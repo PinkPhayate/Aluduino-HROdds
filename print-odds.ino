@@ -3,8 +3,10 @@ const int cathode_pins[] = {7, 9, 10, 13};  // カソードに接続するArduin
 const int dot_pin= 4;
 const int number_of_anode_pins = sizeof(anode_pins) / sizeof(anode_pins[0]);
 const int number_of_cathode_pins = sizeof(cathode_pins) / sizeof(cathode_pins[0]);
+const int PLAT_BUTTON = 999;
 int numbers_to_display = 0; // LEDに表示する数字を保持する変数
 double number_to_display = 0.0;
+bool enableToPrint = true;  //  ディスプレイに書き込み可不可を判定するフラグ
 #define ERROR_NUM 999
 #define INPUT_MODE 10000
 
@@ -23,7 +25,6 @@ const int digits[] = {
   0b01111001, // E
 };
 
-bool enableToPrint = true;
 
 // IC_number
 #define IR_IN 14
@@ -37,7 +38,7 @@ int nums[2] = {0,0};
 void display_number (int n) {
   for (int i = 0; i < number_of_anode_pins; i++) {
     digitalWrite(anode_pins[i], digits[n] & (1 << i) ? HIGH : LOW);
-     
+
   }
   digitalWrite(4, LOW);
   //Serial.println(n);
@@ -50,7 +51,7 @@ void display_number_with_dot (int n) {
   digitalWrite(4, LOW);
 
 
-  
+
   //Serial.println(n);
 }
 
@@ -98,7 +99,7 @@ void print_number() {
   double origin_n = number_to_display;
   //int dot_position = find_dot_dot_position(origin_n);
   int n = to_int( origin_n, 1 );
-  
+
   for (int i = 0; i < number_of_cathode_pins; i++) {
     digitalWrite(cathode_pins[i], LOW);
     if(i == 1) {
@@ -162,7 +163,7 @@ void loop () {
       if(inputchar==-1){
         clear_segments();
       }
-    
+
       if(inputchar!=0.00){
         Serial.println(inputchar);
         if(inputchar==999.00)number_to_display=ERROR_NUM;
@@ -185,7 +186,7 @@ ISR(TIMER2_COMPA_vect) {
   if (enableToPrint ) {
     print_number();
   }
-  
+
 }
 
 //データ受信
@@ -196,12 +197,12 @@ void ir_read(byte ir_pin){
   unsigned long now, last, start_at;
   boolean stat;
   start_at = micros();
-   
+
   //2.5秒以上入力がなかったら終了
   while(stat = digitalRead(ir_pin)){
     if(micros() - start_at > 2500000) return;
   }
-   
+
   start_at = last = micros();
   for(int i = 0; i < IR_DATA_SIZE; i++){
     //入力が反転するまで待ち（上限25ms）
@@ -214,15 +215,14 @@ void ir_read(byte ir_pin){
     last = now;
     stat = !stat;
   }
-   
-}
 
+}
 
 //解析データ出力
 void ir_print_2(){
   int j = 0;
   byte result = 0;
-   
+
   //1or0判定
   for (int i = 3; i < 66; i+=2){
     if(ir_data[i] > 10){
@@ -232,7 +232,7 @@ void ir_print_2(){
     }
     j++;
   }
-   
+
   //データを数値化
   for (int i = 0; i < 8; i++){
     if(ir_code[i+16] == ir_code[i+24]){  //反転データチェック
@@ -242,8 +242,53 @@ void ir_print_2(){
       bitWrite(result,i,ir_code[i+16]);
     }
   }
-   
+
   if(0 != result) {
-    Serial.println(result);    
+    Serial.println(result);
+    translate(result);
   }
+}
+
+// 入力文字を変換
+void translate(byte input_num) {
+  double translated_num = 999;
+  switch (input_num) {
+    case 22:
+      translated_num = 0;
+      break;
+    case 12:
+      translated_num = 1;
+      break;
+    case 24:
+      translated_num = 2;
+      break;
+    case 94:
+      translated_num = 3;
+      break;
+    case 8:
+      translated_num = 4;
+      break;
+    case 28:
+      translated_num = 5;
+      break;
+    case 90:
+      translated_num = 6;
+      break;
+    case 66:
+      translated_num = 7;
+      break;
+    case 82:
+      translated_num = 8;
+      break;
+    case 74:
+      translated_num = 9;
+      break;
+    case 67:
+      translated_num = 999;
+      break;
+    default:
+        Serial.println("unexpected number");
+  }
+  enableToPrint = true;
+  number_to_display = translated_num;
 }
