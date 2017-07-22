@@ -3,10 +3,11 @@ const int cathode_pins[] = {7, 9, 10, 13};  // カソードに接続するArduin
 const int dot_pin= 4;
 const int number_of_anode_pins = sizeof(anode_pins) / sizeof(anode_pins[0]);
 const int number_of_cathode_pins = sizeof(cathode_pins) / sizeof(cathode_pins[0]);
-const int PLAT_BUTTON = 999;
+const int PLAT_BUTTON = 1000;
 int numbers_to_display = 0; // LEDに表示する数字を保持する変数
 double number_to_display = 0.0;
 bool enableToPrint = true;  //  ディスプレイに書き込み可不可を判定するフラグ
+double input_nums[2] = {0.0, 0.0};  // リモコンからの入力を格納する配列
 #define ERROR_NUM 999
 #define INPUT_MODE 10000
 
@@ -160,16 +161,7 @@ void loop () {
   }
   else {
     enableToPrint = true;
-      if(inputchar==-1){
-        clear_segments();
-      }
-
-      if(inputchar!=0.00){
-        Serial.println(inputchar);
-        if(inputchar==999.00)number_to_display=ERROR_NUM;
-        else set_number(inputchar);
-        delay(1000);
-      }
+    display_mode(inputchar);
   }
 
 }
@@ -178,6 +170,19 @@ void ir_mode() {
       ir_read(IR_IN);
 //    ir_print_1();
     ir_print_2();
+
+}
+void display_mode(double inputchar) {
+  if(inputchar==-1){
+    clear_segments();
+  }
+
+  if(inputchar!=0.00){
+    Serial.println(inputchar);
+    if(inputchar==999.00) number_to_display=ERROR_NUM;
+    else set_number(inputchar);
+    delay(1000);
+  }
 
 }
 
@@ -252,6 +257,7 @@ void ir_print_2(){
 // 入力文字を変換
 void translate(byte input_num) {
   double translated_num = 999;
+  bool is_not_play_button = true;
   switch (input_num) {
     case 22:
       translated_num = 0;
@@ -284,11 +290,23 @@ void translate(byte input_num) {
       translated_num = 9;
       break;
     case 67:
-      translated_num = 999;
+      is_not_play_button = false;
+      translated_num = PLAT_BUTTON;
       break;
     default:
         Serial.println("unexpected number");
   }
-  enableToPrint = true;
-  number_to_display = translated_num;
+  if (is_not_play_button) {
+    // キューの構造体
+    input_nums[1] = input_nums[0];
+    input_nums[0] = (double)translated_num;
+  }
+  if(!is_not_play_button) {
+    enableToPrint = true;
+    double num = input_nums[1]*10 + input_nums[0];
+    input_nums[1] = 0.0;
+    input_nums[0] = 0.0;
+    set_number(num);
+    /** ここでコンソールに出力して、値をもらう*/
+  }
 }
