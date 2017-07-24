@@ -32,6 +32,7 @@ def test_get_race_odds(mode=None):
     if odds_list is None:
         odds_list = wrapper.get_race_odds(mode)
         chd.set_race_odds_list(odds_list)
+    print(odds_list)
     return odds_list
 
 def export(odds_list):
@@ -73,12 +74,15 @@ def notify_one(num):
         return
     num = int(float(num))
     odds_list = wrapper.get_race_odds(args[1])
-    print()
     odds = wrapper.retrieve_odds(odds_list, num)
+
+    print('key is: ' + str(num))
+    print('return value is: ', end='')
     if odds is None:
         print('couldnt find that odds: ' + str(num))
         return
     with serial.Serial( MACHINE_NAME, PORT, timeout=1) as ser:
+        print(str(odds).encode('utf-8'))
         ser.write(str(odds).encode('utf-8'))
         ser.close()
 
@@ -88,11 +92,15 @@ def analyze(input):
     method for translate number from alduino to python language
     """
     w = input.strip()
-    if w == '1000':
-        return 'notify'
-    print('w is: ',end='')
-    print(w)
-    return w.decode()
+    # if w == '1000':
+    #     return 'notify'
+    try:
+        analyzed_value = w.decode()
+    except:
+        print('couldnt decode word is:',end='')
+        print(w)
+        return None
+    return analyzed_value
 
 
 def is_float(s):
@@ -115,7 +123,7 @@ def serial_read():
             # num = analyze(c.decode())
             if num is None:
                 print('input number is invalid')
-            elif num == 'notify':
+            elif num == '1000':
                 print('notification mode')
                 notify()
             else:
