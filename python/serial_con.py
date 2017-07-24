@@ -73,6 +73,7 @@ def notify_one(num):
         return
     num = int(float(num))
     odds_list = wrapper.get_race_odds(args[1])
+    print()
     odds = wrapper.retrieve_odds(odds_list, num)
     if odds is None:
         print('couldnt find that odds: ' + str(num))
@@ -89,23 +90,9 @@ def analyze(input):
     w = input.strip()
     if w == '1000':
         return 'notify'
-    # if int(w) is in range(0,18):
-    #     return None
-    # print(w)
-    # if w == '67':
-    #     return
-    #
-    # num = trans_dict[w] if w in trans_dict.keys() else '*'
-    # print(w)
-    return w
-
-def end_input(ser, num):
-    odds_list = test_get_race_odds(args[1])
-    rtval = wrapper.retrieve_odds(odds_list, num)
-    if rtval is not None:
-        ser.write(str(rtval).encode('utf-8'))
-    else:
-        ser.write(str("10000").encode('utf-8'))
+    print('w is: ',end='')
+    print(w)
+    return w.decode()
 
 
 def is_float(s):
@@ -118,30 +105,27 @@ def is_float(s):
 def serial_read():
     with serial.Serial( MACHINE_NAME, PORT, timeout=1) as ser:
         nums = []
-        while True:
-            try:
-                c = ser.readline()
-            except(serial.serialutil.SerialException):
-                print('unexpected return value')
-                c = ''
-            if 0<len(c):
-                # print(c)
-                num = analyze(c.decode())
-                print('get number is :'+num)
-                if num is None:
-                    print('input number is invalid')
-                elif num == 'notify':
-                    print('notification mode')
-                    notify()
-                else:
-                    notify_one(num)
-                    # break
+        try:
+            c = ser.readline()
+        except(serial.serialutil.SerialException):
+            print('unexpected return value')
+            c = ' '
+        if 0<len(c):
+            num = analyze(c)
+            # num = analyze(c.decode())
+            if num is None:
+                print('input number is invalid')
+            elif num == 'notify':
+                print('notification mode')
+                notify()
+            else:
+                notify_one(num)
         ser.close()
     return
 
 # while(True):
 
-
-serial_read()
+while True:
+    serial_read()
 # odds_list = test_get_race_odds(args[1])
 # print(odds_list)
