@@ -11,6 +11,14 @@ def get_race_odds(mode= None):
     return odds_list
 
 def retrieve_odds(odds_list, num):
-    if num.isdigit() and int(num) < len(dict):
-        return odds_list[no]
+    """
+    @param num: integer
+    """
+    try:
+        num = int(num)
+    except:
+        print('[ERROR] unexpected variable type. var must he integer')
+        return None
+    if num < len(odds_list):
+        return odds_list[num]
     return None

@@ -319,6 +319,7 @@ double calc_input_nums() {
   return input_nums[1]*10 + input_nums[0];
 }
 void get_odds(double num) {
+  // display at console and send number to pc
   if(0 < num) Serial.println(num);
   else Serial.println(PLAT_BUTTON);
 }
