@@ -15,7 +15,7 @@ def retrieve_odds(odds_list, num):
     @param num: integer
     """
     try:
-        num = int(num)
+        num = int(num)-1
     except:
         print('[ERROR] unexpected variable type. var must he integer')
         return None
