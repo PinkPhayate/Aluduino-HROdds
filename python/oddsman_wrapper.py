@@ -16,8 +16,11 @@ def retrieve_odds(odds_list, num):
     """
     try:
         num = int(num)-1
+        if num < 0:
+            print('[ERROR] unexpected variable type. var must be positive number')
+            return None
     except:
-        print('[ERROR] unexpected variable type. var must he integer')
+        print('[ERROR] unexpected variable type. var must be integer')
         return None
     if num < len(odds_list):
         return odds_list[num]
