@@ -6,7 +6,7 @@ import serial_con as sc
 import re
 import oddsman_wrapper as wrapper
 import cached as chd
-
+from time import sleep
 trans_dict   = {'22': '0',
                 '12': '1',
                 '24': '2',
@@ -19,7 +19,7 @@ trans_dict   = {'22': '0',
                 '74': '9'}
 
 
-MACHINE_NAME = "/dev/cu.usbmodem14511"
+MACHINE_NAME = "/dev/cu.usbmodem14111"
 PORT         = "115200"
 args = sys.argv
 
@@ -73,6 +73,7 @@ def notify_one(num):
     if not is_float(num):
         return
     num = int(float(num))
+    print(num)
     odds_list = wrapper.get_race_odds(args[1])
     odds = wrapper.retrieve_odds(odds_list, num)
 
@@ -113,11 +114,16 @@ def is_float(s):
 def serial_read():
     with serial.Serial( MACHINE_NAME, PORT, timeout=1) as ser:
         nums = []
-        try:
-            c = ser.readline()
-        except(serial.serialutil.SerialException):
-            print('unexpected return value')
-            c = ' '
+        while True:
+            try:
+                c = ser.readline()
+                print(c)
+                if 0<len(c):
+                    break;
+            except(serial.serialutil.SerialException):
+                print('unexpected return value')
+                c = None
+        print('break')
         if 0<len(c):
             num = analyze(c)
             # num = analyze(c.decode())
@@ -129,11 +135,13 @@ def serial_read():
             else:
                 notify_one(num)
         ser.close()
+
     return
 
 # while(True):
 
 while True:
     serial_read()
+    sleep(10)
 # odds_list = test_get_race_odds(args[1])
 # print(odds_list)
