@@ -294,7 +294,7 @@ void translate(byte input_num) {
       translated_num = PLAT_BUTTON;
       break;
     default:
-        Serial.println("unexpected number");
+      initialize_input_nums();
   }
   if (is_not_play_button) {
     // キューの構造体
@@ -306,14 +306,17 @@ void translate(byte input_num) {
   if(!is_not_play_button) {
     enableToPrint = true;
     double num = calc_input_nums();
-    input_nums[1] = 0.0;
-    input_nums[0] = 0.0;
 //    Serial.println(num);
     set_number(num);
     get_odds(num);
+    initialize_input_nums();
     /** ここでコンソールに出力して、値をもらう*/
 
   }
+}
+void initialize_input_nums() {
+    input_nums[1] = 0.0;
+    input_nums[0] = 0.0;  
 }
 double calc_input_nums() {
   return input_nums[1]*10 + input_nums[0];
