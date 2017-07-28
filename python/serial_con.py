@@ -22,6 +22,8 @@ trans_dict   = {'22': '0',
 MACHINE_NAME = "/dev/cu.usbmodem14111"
 PORT         = "115200"
 args = sys.argv
+if 1 < len(args):
+    mode = 'test' if args[1]=='test' else None
 
 def save_cash(race_id, odds_list):
     print('save_cash')
@@ -34,6 +36,15 @@ def test_get_race_odds(mode=None):
         chd.set_race_odds_list(odds_list)
     print(odds_list)
     return odds_list
+
+def get_race_odds_real_time():
+    odds_list = chd.get_race_odds_list()
+    if odds_list is None:
+        odds_list = wrapper.get_race_odds(mode)
+        chd.set_race_odds_list(odds_list)
+    print(odds_list)
+    return odds_list
+
 
 def export(odds_list):
     with serial.Serial( MACHINE_NAME, PORT, timeout=1) as ser:
@@ -56,7 +67,7 @@ def notify():
     """
     acknowledge odds about all race hource
     """
-    odds_list = wrapper.get_race_odds(args[1])
+    odds_list = wrapper.get_race_odds(mode)
     with serial.Serial( MACHINE_NAME, PORT, timeout=1) as ser:
         for i, odds in enumerate(odds_list):
             ser.write(str(i+1).encode('utf-8'))
@@ -74,7 +85,7 @@ def notify_one(num):
         return
     num = int(float(num))
     print(num)
-    odds_list = wrapper.get_race_odds(args[1])
+    odds_list = wrapper.get_race_odds(mode)
     odds = wrapper.retrieve_odds(odds_list, num)
 
     print('key is: ' + str(num))
