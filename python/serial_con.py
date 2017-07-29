@@ -19,7 +19,7 @@ trans_dict   = {'22': '0',
                 '74': '9'}
 
 
-MACHINE_NAME = "/dev/cu.usbmodem14111"
+MACHINE_NAME = "/dev/cu.usbmodem1411"
 PORT         = "115200"
 args = sys.argv
 mode = None
@@ -35,7 +35,8 @@ def test_get_race_odds(mode=None):
     if odds_list is None:
         odds_list = wrapper.get_race_odds(mode)
         chd.set_race_odds_list(odds_list)
-    print(odds_list)
+    else:
+        odds_list = odds_list.decode('utf-8')
     return odds_list
 
 def get_race_odds_real_time():
@@ -60,7 +61,7 @@ def export(odds_list):
             print(odds)
             no += 1
             time.sleep(2)
-            break
+            # break
 
         # ser.write("999".encode('utf-8'))
         ser.close()
@@ -78,7 +79,7 @@ def notify():
             ser.write(str(odds).encode('utf-8'))
             print(odds)
             time.sleep(2)
-            break;
+            # break;
         print("notify mode has finished")
         ser.close()
 
@@ -86,7 +87,7 @@ def notify_one(num):
     if not is_float(num):
         return
     num = int(float(num))
-    print(num)
+    # print(num)
     odds_list = wrapper.get_race_odds(mode)
     odds = wrapper.retrieve_odds(odds_list, num)
 
@@ -112,7 +113,7 @@ def analyze(input):
         analyzed_value = w.decode()
     except:
         print('couldnt decode word is:',end='')
-        print(w)
+        # print(w)
         return None
     return analyzed_value
 
@@ -130,15 +131,17 @@ def serial_read():
         while True:
             try:
                 c = ser.readline()
-                print(c)
+                # print(c)
                 if 0<len(c):
-                    break;
+                    break
             except(serial.serialutil.SerialException):
                 print('unexpected return value')
                 c = None
         print('break')
         if 0<len(c):
             num = analyze(c)
+            print('analyzed number: ', end='')
+            print(num)
             # num = analyze(c.decode())
             if num is None:
                 print('input number is invalid')
