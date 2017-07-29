@@ -22,6 +22,7 @@ trans_dict   = {'22': '0',
 MACHINE_NAME = "/dev/cu.usbmodem14111"
 PORT         = "115200"
 args = sys.argv
+mode = None
 if 1 < len(args):
     mode = 'test' if args[1]=='test' else None
 
@@ -42,7 +43,8 @@ def get_race_odds_real_time():
     if odds_list is None:
         odds_list = wrapper.get_race_odds(mode)
         chd.set_race_odds_list(odds_list)
-    print(odds_list)
+    else:
+        odds_list = odds_list.decode('utf-8')
     return odds_list
 
 
