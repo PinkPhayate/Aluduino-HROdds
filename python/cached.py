@@ -3,7 +3,7 @@ import redis
 r = redis.Redis(host='localhost', port=6379, db=0)
 def set_race_odds_list(list):
     r.set('odds-list', list)
-    r.expire('odds-list', 60*5)
+    r.expire('odds-list', 30)
 
 def get_race_odds_list():
     list = r.get('odds-list')
