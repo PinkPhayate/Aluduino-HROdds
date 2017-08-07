@@ -19,7 +19,7 @@ trans_dict   = {'22': '0',
                 '74': '9'}
 
 
-MACHINE_NAME = "/dev/cu.usbmodem1411"
+MACHINE_NAME = "/dev/cu.usbmodem1421"
 PORT         = "115200"
 args = sys.argv
 mode = None
@@ -95,7 +95,8 @@ def notify_one(num):
     print('return value is: ', end='')
     if odds is None:
         print('couldnt find that odds: ' + str(num))
-        return
+        odds = 999.0
+
     with serial.Serial( MACHINE_NAME, PORT, timeout=1) as ser:
         print(str(odds).encode('utf-8'))
         ser.write(str(odds).encode('utf-8'))
