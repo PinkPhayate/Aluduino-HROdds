@@ -1,5 +1,11 @@
 # Aruduino プログラム
 
+## 概要
+競馬のオッズをリアルタイムに取得するモジュール[oddsman](https://github.com/PinkPhayate/oddsman "oddsman")を利用して、リアルタイムにオッズを取得し、ディスプレイに表示させる
+
+[デモ動画](https://www.instagram.com/p/BXHrj7wl6Vv/?hl=ja&taken-by=pinqphayate)
+
+
 ## タスク
 - wikiに書きました
   https://github.com/PinkPhayate/Aluduino-HROdds/wiki/TODO-task
